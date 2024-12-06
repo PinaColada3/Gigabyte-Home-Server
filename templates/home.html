@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask & JS Example</title>
+</head>
+<body>
+    <h1>Gigabyte Server</h1>
+    <p id="mail_opened" class="mail_opened">Test {{ mail_opened }}</p>
+    <button onclick="reset()">reset</button>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>>
+</body>
+</html>
