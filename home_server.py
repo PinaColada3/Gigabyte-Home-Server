@@ -4,6 +4,7 @@ import socket
 import threading
 import time
 
+import gigabyte_constants
 
 app = Flask(__name__)
 
@@ -27,7 +28,8 @@ class Gigabyte:
         # Socket.
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket.bind(("0.0.0.0", 8090))
+        self.socket.bind(("0.0.0.0", 
+                          gigabyte_constants.GIGABYTE_TCP_SERVER_PORT))
         self.socket.settimeout(0.1)
 
         # Private
@@ -57,7 +59,7 @@ class Gigabyte:
             try:
                 self.socket.listen(1)
                 client, _ = self.socket.accept()
-                client.sendall(b"open")
+                client.sendall(b"on")
                 client.close()
             except socket.timeout:
                 pass
@@ -67,8 +69,9 @@ class Gigabyte:
             try:
                 self.socket.listen(1)
                 client, addr = self.socket.accept()
-                ret = client.recv(1024).decode()
-                print(ret, addr, dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                print(addr, dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                client.sendall(b"on")
+                client.close()
             except socket.timeout:
                 pass
 
@@ -76,7 +79,7 @@ class Gigabyte:
 def main():
     gigabyte = Gigabyte()
     gigabyte.start()
-    app.run(host='0.0.0.0', port=7234)
+    app.run(host='0.0.0.0', port=gigabyte_constants.GIGABYTE_HTTP_SERVER_PORT)
     gigabyte.stop()
 
 

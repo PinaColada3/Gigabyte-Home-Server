@@ -1,24 +1,66 @@
-import wifi
+import errno
 import socketpool
-import ipaddress
 import time
+import wifi
 
-pool = socketpool.SocketPool(wifi.radio)
 
-while True:
-    print("Create TCP Client Socket")
-    with pool.socket(pool.AF_INET, pool.SOCK_STREAM) as s:
-        s.settimeout(5)
+def turn_on():
+    pass
 
-        print("Connecting")
-        s.connect(('gigabyte.local', 8090))
 
-        size = s.send(b'Hello, world')
+def turn_off():
+    pass
 
-        time.sleep(5)
 
 # Init.
 pool = socketpool.SocketPool(wifi.radio)
 
+connected = False
+socket = None
+RECV_SIZE = 1024
+recv_buffer = bytearray(1024)
+
+# Main loop.
 while True:
-    
+    # Connect to the server if not connected.
+    if not connected:
+        if socket is None:
+            socket = pool.socket(pool.AF_INET, pool.SOCK_STREAM)
+            socket.settimeout(5)
+        try:
+            socket.connect(('gigabyte.local', 8090))
+            print('Connected')
+            connected = True
+        except OSError:
+            time.sleep(5)
+            continue
+
+    # Listen for messages.
+    try:
+        size = socket.recv_into(recv_buffer)
+        print(size, recv_buffer[:size])
+        if size > 0:
+            msg = recv_buffer[:size].decode()
+            if msg == 'on':
+                # Turn on instruction.
+                print("Turn on")
+                turn_on()
+            elif msg == 'off':
+                # Turn off instruction.
+                print("Turn off")
+                turn_off()
+        else:
+            # Size 0 == client.close()
+            connected = False
+            socket.close()
+            socket = None
+    except OSError as e:
+        if e.errno == errno.ETIMEDOUT:
+            pass
+        elif e.errno == errno.ECONNRESET:
+            connected = False
+            socket.close()
+            socket = None
+
+    # Wait.
+    time.sleep(5)
