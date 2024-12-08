@@ -70,7 +70,9 @@ class Gigabyte:
                 self.socket.listen(1)
                 client, addr = self.socket.accept()
                 print(addr, dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-                client.sendall(b"on")
+                ret = client.recv(1024)
+                print(ret.decode())
+                # client.sendall(b"on")
                 client.close()
             except socket.timeout:
                 pass
