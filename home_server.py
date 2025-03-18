@@ -79,10 +79,7 @@ class Gigabyte:
         # Private.
         self._running = threading.Event()
         self._running.clear()
-        if debug:
-            self._run_thread = threading.Thread(target=self.debug_run)
-        else:
-            self._run_thread = threading.Thread(target=self.run)
+        self._run_thread = threading.Thread(target=self.run)
             
         # Mailbox handling.
         self.mailbox_opened = MailboxStatus.EMPTY
@@ -162,7 +159,7 @@ def main():
     Starts the TCP server and RESTful API. Expected on only expose the API
     on localhost only.
     """
-    gigabyte = Gigabyte()
+    gigabyte = Gigabyte(debug=True)
     gigabyte.start()
     app.run(host='localhost', port=gigabyte_constants.GIGABYTE_HTTP_SERVER_PORT)
     gigabyte.stop()
